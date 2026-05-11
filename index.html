@@ -14,11 +14,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <!-- Page Title - Change this to your name/brand (50-60 characters recommended) -->
-    <title>LittleLink</title>
+    <title>weeluke.co.uk</title>
     <link rel="icon" type="image/x-icon" href="/images/avatar.png"> <!-- Update this with your own favicon -->
 
     <!-- Meta Description - Write a description (150-160 characters recommended) -->
-    <meta name="description" content="Replace this with your own, this appears in search results and when sharing.">
+    <meta name="description" content="A place, where you can find all of my public socials!">
 
     <!-- Keywords -->
     <meta name="keywords" content="Luke, IT, Jemima">
@@ -54,7 +54,7 @@
 
               Be sure to replace the src with your own image path and update the alt text
             -->
-            <img class="avatar avatar--rounded" src="images/jemima@weeluke.co.uk.jpg" srcset="images/jemima@weeluke.co.uk@2x.jpg 2x" alt="Jemima's Avatar">
+            <img class="avatar avatar--rounded" src="images/jemima@weeluke.co.uk.jpg" srcset="images/jemima@weeluke.co.uk.jpg" alt="Jemima's Avatar">
 
             <!-- Replace with your name or brand -->
             <h1>
@@ -80,16 +80,16 @@
 <a class="button button-discord" href="https://discord.com/users/783776027846639688" target="_blank" rel="noopener" role="button"> <img class="icon" aria-hidden="true" src="images/icons/discord.svg" alt="Discord Logo"> Discord </a>
 
 <!-- Spotify -->
-              <a class="button button-spotify" href="#" target="_blank" rel="https://open.spotify.com/user/7q75e5xnqt0ervc0p2k2nhjow" role="button"><img class="icon" aria-hidden="true" src="images/icons/spotify.svg" alt="Spotify Logo">Come stalk my Spotify!</a>
+              <a class="button button-spotify" href="https://open.spotify.com/user/7q75e5xnqt0ervc0p2k2nhjow" target="_blank" rel="noopener" role="button"><img class="icon" aria-hidden="true" src="images/icons/spotify.svg" alt="Spotify Logo">Come stalk my Spotify!</a>
 
                <!-- GitHub -->
-              <a class="button button-github" href="#" target="_blank" rel="https://github.com/jemimasyrup" role="button"><img class="icon" aria-hidden="true" src="images/icons/github.svg" alt="GitHub Logo">GitHub (Inactive)</a>
+              <a class="button button-github" href="https://github.com/jemimasyrup" target="_blank" rel="https://github.com/jemimasyrup" role="button"><img class="icon" aria-hidden="true" src="images/icons/github.svg" alt="GitHub Logo">GitHub (Inactive)</a>
 
               <!-- Generic Email -->
-              <a class="button button-default" href="#" target="_blank" rel="me@weeluke.co.uk" role="button"><img class="icon" aria-hidden="true" src="images/icons/generic-email.svg" alt="Email Icon">Email Me!</a>
+              <a class="button button-default" href="mailto:me@weeluke.co.uk" target="_blank" rel="me@weeluke.co.uk" role="button"><img class="icon" aria-hidden="true" src="images/icons/generic-email.svg" alt="Email Icon">Email Me!</a>
 
               <!-- Roblox -->
-              <a class="button button-default" href="#" target="_blank" rel="https://www.roblox.com/users/9760396757/profile" role="button"><img class="icon" aria-hidden="true" src="images/icons/Roblox_Logo.svg" alt="Roblox">Wee Roblox</a>
+              <a class="button button-default" href="https://www.roblox.com/users/9760396757/profile" target="_blank" rel="noopener" role="button"><img class="icon" aria-hidden="true" src="images/icons/Roblox_Logo.svg" alt="Roblox">Wee Roblox</a>
 
               <!-- Apple Podcasts -->
               <a class="button button-apple-podcasts" href="#" target="_blank" rel="noopener" role="button"><img class="icon" aria-hidden="true" src="images/icons/apple-podcasts.svg" alt="Apple Podcasts Logo">Listen on Apple Podcasts</a>
@@ -404,6 +404,20 @@
 
     </div>
   </div>
+  
+<audio id="bgmusic" loop>
+  <source src="party.mp3" type="audio/mpeg">
+</audio>
+
+<script>
+  const music = document.getElementById("bgmusic");
+
+  window.addEventListener("load", () => {
+    document.body.addEventListener("click", () => {
+      music.play();
+    }, { once: true });
+  });
+</script>
 
 </body>
 
