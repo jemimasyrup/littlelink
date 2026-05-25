@@ -2,14 +2,6 @@ export default {
   async fetch(request, env) {
     const url = new URL(request.url);
 
-    if (url.pathname === "/api/mood") {
-      if (!env.GEMINI_API_KEY) {
-        return new Response(
-          JSON.stringify({ mood: "SECRET NOT FOUND" }),
-          { headers: { "Content-Type": "application/json" } }
-        );
-      }
-
       try {
         const LASTFM_KEY = "be3c5d62a114a966685354a725e8738e";
         const LASTFM_USER = "hp173011";
