@@ -826,67 +826,20 @@
         box.innerHTML = "Spotify status failed to load.";
       }
     }
-
 async function loadMoodFromSongs() {
-
-  const moodBox =
-    document.getElementById("auto-mood");
+  const moodBox = document.getElementById("auto-mood");
 
   if (!moodBox) return;
 
   try {
-
-    const response =
-      await fetch("/api/mood");
-
-    const data =
-      await response.json();
-
-    moodBox.textContent =
-      data.mood;
-
-  } catch (error) {
-
-    moodBox.textContent =
-      "emotionally unavailable";
-
-  }
-}  const moodBox = document.getElementById("auto-mood");
-  if (!moodBox) return;
-
-  try {
-    const url = `https://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user=${lastfmUsername}&api_key=${lastfmApiKey}&format=json&limit=5`;
-    const response = await fetch(url);
+    const response = await fetch("/api/mood");
     const data = await response.json();
 
-    const tracks = data.recenttracks?.track || [];
-
-    const songText = tracks
-      .map(track => `${track.name} ${track.artist["#text"]}`)
-      .join(" ")
-      .toLowerCase();
-
-    let mood = "mysterious, iconic, and mildly dramatic";
-
-    if (songText.includes("sad") || songText.includes("cry") || songText.includes("lonely")) {
-      mood = "sad girl hours but still iconic";
-    } else if (songText.includes("party") || songText.includes("dance") || songText.includes("club")) {
-      mood = "party mode, absolutely causing chaos";
-    } else if (songText.includes("love") || songText.includes("heart")) {
-      mood = "romantic, delusional, and thriving";
-    } else if (songText.includes("rage") || songText.includes("kill") || songText.includes("bad")) {
-      mood = "angry but serving";
-    } else if (songText.includes("pink") || songText.includes("girl") || songText.includes("pop")) {
-      mood = "cunty pop diva energy";
-    }
-
-    moodBox.textContent = mood;
-
+    moodBox.textContent = data.mood || "too mysterious to analyse";
   } catch (error) {
-    moodBox.textContent = "too mysterious to analyse";
+    moodBox.textContent = "emotionally unavailable";
   }
 }
-
     async function loadSpotifyHistory() {
       const box = document.getElementById("spotify-history");
 
