@@ -3,15 +3,19 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>wee.luke</title>
+  <title>wee.luke</title>
 
-<link id="dynamicFavicon" rel="icon" type="image/png" href="/images/avatar.png">
+  <link id="dynamicFavicon" rel="icon" type="image/png" href="/images/avatar.png">
 
   <link rel="stylesheet" href="css/reset.css">
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/brands.css">
 
   <style>
+    * {
+      cursor: url("xp-cursor.cur"), auto;
+    }
+
     body {
       min-height: 100vh;
       margin: 0;
@@ -19,6 +23,93 @@
       background: url("grass.png") center center / cover no-repeat fixed;
       overflow-x: hidden;
       padding-bottom: 55px;
+    }
+
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background: repeating-linear-gradient(
+        to bottom,
+        rgba(255,255,255,0.03),
+        rgba(255,255,255,0.03) 1px,
+        transparent 1px,
+        transparent 2px
+      );
+      z-index: 999998;
+    }
+
+    #xpLogin {
+      position: fixed;
+      inset: 0;
+      z-index: 1000000;
+      background: linear-gradient(to bottom, #5a7edc, #245edb);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      color: white;
+      font-family: Tahoma, Verdana, sans-serif;
+      transition: opacity 0.7s ease;
+      text-shadow: 2px 2px #003c9e;
+    }
+
+    #xpLogin img {
+      width: 110px;
+      height: 110px;
+      border-radius: 12px;
+      border: 3px solid white;
+      margin-bottom: 18px;
+      object-fit: cover;
+    }
+
+    #xpLogin h2 {
+      margin: 0;
+      font-size: 28px;
+    }
+
+    #xpLogin p {
+      color: white;
+      margin: 8px 0;
+    }
+
+    #xpLogin button {
+      margin-top: 15px;
+      padding: 8px 24px;
+      border: 2px outset white;
+      background: #ece9d8;
+      font-weight: bold;
+      font-family: Tahoma, Verdana, sans-serif;
+    }
+
+    .desktop-icons {
+      position: fixed;
+      top: 20px;
+      left: 15px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      z-index: 1;
+    }
+
+    .desktop-icon {
+      width: 82px;
+      text-align: center;
+      color: white;
+      text-shadow: 1px 1px 2px black;
+      font-size: 12px;
+      user-select: none;
+      text-decoration: none;
+      font-family: Tahoma, Verdana, sans-serif;
+    }
+
+    .desktop-icon img {
+      width: 48px;
+      height: 48px;
+      display: block;
+      margin: 0 auto 4px auto;
+      filter: brightness(0) saturate(100%) invert(1) drop-shadow(1px 1px 1px black);
     }
 
     .xp-window {
@@ -73,14 +164,21 @@
     #status-window {
       top: 80px;
       left: 30px;
-      width: 320px;
+      width: 360px;
     }
 
     #spotify-window {
       top: 80px;
       right: 30px;
       left: auto;
-      width: 340px;
+      width: 360px;
+    }
+
+    #mood-window {
+      top: 430px;
+      right: 30px;
+      left: auto;
+      width: 280px;
     }
 
     .avatar {
@@ -109,13 +207,6 @@
       height: 28px;
       display: inline-block;
       background: url("flag.gif") center center / cover no-repeat;
-      transform-origin: left center;
-    }
-
-    @keyframes flagWave {
-      0% { transform: perspective(80px) rotateY(0deg); }
-      50% { transform: perspective(80px) rotateY(18deg); }
-      100% { transform: perspective(80px) rotateY(0deg); }
     }
 
     p {
@@ -130,6 +221,47 @@
       border: 2px inset #fff;
       padding: 8px;
       margin: 10px 0;
+    }
+
+    .mood-widget {
+      margin-top: 14px;
+      background: #ece9d8;
+      border: 2px inset white;
+      padding: 10px;
+      font-size: 13px;
+      text-align: left;
+      line-height: 1.45;
+    }
+
+    .visualizer {
+      margin-top: 14px;
+      height: 34px;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      gap: 4px;
+      background: black;
+      border: 2px inset white;
+      padding: 6px;
+    }
+
+    .bar {
+      width: 7px;
+      background: lime;
+      animation: bounce 1s infinite ease-in-out;
+    }
+
+    .bar:nth-child(2) { animation-delay: 0.1s; }
+    .bar:nth-child(3) { animation-delay: 0.2s; }
+    .bar:nth-child(4) { animation-delay: 0.3s; }
+    .bar:nth-child(5) { animation-delay: 0.4s; }
+    .bar:nth-child(6) { animation-delay: 0.5s; }
+    .bar:nth-child(7) { animation-delay: 0.6s; }
+    .bar:nth-child(8) { animation-delay: 0.7s; }
+
+    @keyframes bounce {
+      0%, 100% { height: 7px; }
+      50% { height: 30px; }
     }
 
     .button-stack {
@@ -153,10 +285,10 @@
     }
 
     .icon {
-  width: 20px;
-  height: 20px;
-  filter: brightness(0) saturate(100%) !important;
-}
+      width: 20px;
+      height: 20px;
+      filter: brightness(0) saturate(100%) !important;
+    }
 
     footer {
       margin-top: 24px;
@@ -223,13 +355,15 @@
       text-decoration: none;
     }
 
-    .track:hover {
+    .track:hover,
+    .spotify-box:hover {
       background: #fff8cc;
     }
 
     .track-info {
       overflow: hidden;
       line-height: 1.35;
+      word-break: break-word;
     }
 
     .track-info small {
@@ -281,44 +415,27 @@
     }
 
     #startOverlay {
-  position: fixed;
-  inset: 0;
-  z-index: 99999;
-
-  background: rgba(0, 84, 227, 0.55);
-  backdrop-filter: blur(3px);
-
-  color: white;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  font-family: Tahoma, Verdana, sans-serif;
-  font-size: 24px;
-  font-weight: bold;
-
-  cursor: pointer;
-
-  text-shadow: 2px 2px #003c9e;
-
-  transition:
-    opacity 1.4s ease,
-    backdrop-filter 1.4s ease,
-    background 1.4s ease;
-}
+      position: fixed;
+      inset: 0;
+      z-index: 99999;
+      background: rgba(0, 84, 227, 0.55);
+      backdrop-filter: blur(3px);
+      color: white;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      font-family: Tahoma, Verdana, sans-serif;
+      font-size: 24px;
+      font-weight: bold;
+      cursor: pointer;
+      text-shadow: 2px 2px #003c9e;
+      transition: opacity 1.4s ease, backdrop-filter 1.4s ease, background 1.4s ease;
+    }
 
     @media (max-width: 1050px) {
-      #main-window {
-        top: 40px;
-        left: 50%;
-        transform: translateX(-50%);
-      }
-
       #status-window {
         top: 660px;
         left: 30px;
-        right: auto;
       }
 
       #spotify-window {
@@ -326,9 +443,19 @@
         right: 30px;
         left: auto;
       }
+
+      #mood-window {
+        top: 1040px;
+        right: 30px;
+        left: auto;
+      }
     }
 
     @media (max-width: 750px) {
+      .desktop-icons {
+        display: none;
+      }
+
       .xp-window {
         position: relative;
         left: auto !important;
@@ -347,8 +474,42 @@
 
 <body>
 
+  <div id="xpLogin">
+    <img src="images/jemima@weeluke.co.uk.jpg" alt="Luke profile picture">
+    <h2>Luke</h2>
+    <p>Click to log in</p>
+    <button onclick="loginXP()">Enter</button>
+  </div>
+
   <div id="startOverlay">
     Click to start Windows XP
+  </div>
+
+  <div class="desktop-icons">
+    <a class="desktop-icon" href="https://discord.com/users/783776027846639688" target="_blank" rel="noopener">
+      <img src="images/icons/discord.svg" alt="Discord">
+      Discord
+    </a>
+
+    <a class="desktop-icon" href="https://open.spotify.com/user/7q75e5xnqt0ervc0p2k2nhjow" target="_blank" rel="noopener">
+      <img src="images/icons/spotify.svg" alt="Spotify">
+      Spotify
+    </a>
+
+    <a class="desktop-icon" href="https://github.com/jemimasyrup" target="_blank" rel="noopener">
+      <img src="images/icons/github.svg" alt="GitHub">
+      GitHub
+    </a>
+
+    <a class="desktop-icon" href="mailto:me@weeluke.co.uk">
+      <img src="images/icons/generic-email.svg" alt="Email">
+      Email
+    </a>
+
+    <a class="desktop-icon" href="https://www.roblox.com/users/9760396757/profile" target="_blank" rel="noopener">
+      <img src="images/icons/Roblox_Logo.svg" alt="Roblox">
+      Roblox
+    </a>
   </div>
 
   <div class="xp-window" id="main-window">
@@ -371,6 +532,11 @@
 
       <p>You can see my PUBLIC socials below.</p>
       <p style="margin-bottom: 20px;">Please don't hesitate to reach out at me@weeluke.co.uk!</p>
+
+      <div class="mood-widget">
+  <strong>Current Mood:</strong><br>
+  <span id="auto-mood">Analysing my last songs...</span>
+</div>
 
       <div class="button-stack" role="navigation">
         <a class="button button-discord" href="https://discord.com/users/783776027846639688" target="_blank" rel="noopener">
@@ -413,6 +579,10 @@
       <div id="discord-status" class="discord-card">
         Loading Discord status...
       </div>
+
+      <div id="lastfm-nowplaying" class="discord-card">
+        Loading Spotify status...
+      </div>
     </div>
   </div>
 
@@ -431,6 +601,8 @@
     </div>
   </div>
 
+
+
   <div class="taskbar">
     <div class="start-button">start</div>
     <div class="taskbar-window">weeluke.co.uk</div>
@@ -448,44 +620,66 @@
   </audio>
 
   <script>
-  const discordId = "783776027846639688";
-
-async function updateTabFromDiscord() {
-  try {
-    const response = await fetch(`https://api.lanyard.rest/v1/users/${discordId}`);
-    const data = await response.json();
-
-    if (!data.success) return;
-
-    const user = data.data.discord_user;
-
-    document.title = `${user.username} ✦ weeluke.co.uk`;
-
-    let avatarURL = "https://cdn.discordapp.com/embed/avatars/0.png";
-
-    if (user.avatar) {
-      avatarURL = `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png?size=128`;
-    }
-
-    const favicon = document.getElementById("dynamicFavicon");
-
-    if (favicon) {
-      favicon.href = avatarURL;
-    }
-
-  } catch (error) {
-    console.log("Could not update tab icon.");
-  }
-}
-
-updateTabFromDiscord();
+    const discordId = "783776027846639688";
     const lastfmUsername = "hp173011";
     const lastfmApiKey = "be3c5d62a114a966685354a725e8738e";
 
     let highestZ = 10;
 
+    function loginXP() {
+      const login = document.getElementById("xpLogin");
+      const startup = document.getElementById("startupSound");
+      const music = document.getElementById("bgmusic");
+
+      if (startup) {
+        startup.volume = 0.7;
+        startup.play();
+      }
+
+      setTimeout(() => {
+        if (music) {
+          music.volume = 0.25;
+          music.play();
+        }
+      }, 4500);
+
+      login.style.opacity = "0";
+
+      setTimeout(() => {
+        login.remove();
+      }, 700);
+    }
+
+    async function updateTabFromDiscord() {
+      try {
+        const response = await fetch(`https://api.lanyard.rest/v1/users/${discordId}`);
+        const data = await response.json();
+
+        if (!data.success) return;
+
+        const user = data.data.discord_user;
+
+        document.title = `${user.username} ✦ weeluke.co.uk`;
+
+        const avatarURL = user.avatar
+          ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png?size=128`
+          : "https://cdn.discordapp.com/embed/avatars/0.png";
+
+        const favicon = document.getElementById("dynamicFavicon");
+
+        if (favicon) {
+          favicon.href = avatarURL;
+        }
+      } catch (error) {
+        console.log("Could not update tab icon.");
+      }
+    }
+
     function makeDraggable(windowElement) {
       const titlebar = windowElement.querySelector(".xp-titlebar");
+
+      if (!titlebar) return;
+
       let offsetX = 0;
       let offsetY = 0;
       let isDragging = false;
@@ -498,6 +692,7 @@ updateTabFromDiscord();
         windowElement.style.zIndex = highestZ;
 
         const rect = windowElement.getBoundingClientRect();
+
         windowElement.style.transform = "none";
         windowElement.style.left = rect.left + "px";
         windowElement.style.top = rect.top + "px";
@@ -524,115 +719,163 @@ updateTabFromDiscord();
       });
     }
 
-    document.querySelectorAll(".xp-window").forEach(makeDraggable);
-
     function updateClock() {
+      const clock = document.getElementById("clock");
+      if (!clock) return;
+
       const now = new Date();
-      document.getElementById("clock").textContent =
-        now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+
+      clock.textContent = now.toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit"
+      });
     }
-
-    updateClock();
-    setInterval(updateClock, 1000);
-
-    const overlay = document.getElementById("startOverlay");
-
-    overlay.addEventListener("click", () => {
-      const startup = document.getElementById("startupSound");
-      const music = document.getElementById("bgmusic");
-
-      startup.volume = 0.7;
-      startup.play();
-
-      setTimeout(() => {
-        music.volume = 0.25;
-        music.play();
-      }, 4500);
-
-      overlay.style.display = "none";
-    }, { once: true });
 
     async function loadDiscord() {
       const box = document.getElementById("discord-status");
+      const statusWindow = document.getElementById("status-window");
+
+      if (!box || !statusWindow) return;
 
       try {
         const response = await fetch(`https://api.lanyard.rest/v1/users/${discordId}`);
         const data = await response.json();
 
         if (!data.success) {
-          box.innerHTML = "Could not load Discord status.";
+          box.innerHTML = "Discord status unavailable.";
           return;
         }
 
         const user = data.data.discord_user;
         const status = data.data.discord_status || "offline";
-        const spotify = data.data.spotify;
 
         let statusClass = "offline";
+
         if (status === "online") statusClass = "online";
         if (status === "idle") statusClass = "idle";
         if (status === "dnd") statusClass = "dnd";
 
-        let avatarURL = "https://cdn.discordapp.com/embed/avatars/0.png";
+        const avatarURL = user.avatar
+          ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`
+          : "https://cdn.discordapp.com/embed/avatars/0.png";
 
-        if (user.avatar) {
-          avatarURL = `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`;
+        const customStatus = data.data.activities?.find(activity => activity.type === 4);
+
+        let customStatusText = "";
+
+        if (customStatus) {
+          customStatusText = customStatus.state || customStatus.name || "";
         }
 
-        let html = `
+        box.innerHTML = `
           <div class="discord-user">
             <img src="${avatarURL}" alt="Discord avatar">
+
             <div>
               <strong>${user.username}</strong><br>
+
               <span class="status-dot ${statusClass}"></span>
-              ${status}
+              ${status === "offline" ? "offline" : status}
+
+              ${status !== "offline" && customStatusText
+                ? `<br><small>${customStatusText}</small>`
+                : ""}
             </div>
           </div>
         `;
-
-        if (spotify) {
-          html += `
-            <a class="spotify-box" href="https://open.spotify.com/search/${encodeURIComponent(spotify.song + ' ' + spotify.artist)}" target="_blank" rel="noopener">
-              <img src="${spotify.album_art_url}" alt="Album art">
-              <div class="track-info">
-                <strong>Currently Listening</strong><br>
-                ${spotify.song}<br>
-                <small>${spotify.artist}</small>
-              </div>
-            </a>
-          `;
-        } else {
-          html += `
-            <div class="spotify-box">
-              <div>
-                <strong>Spotify</strong><br>
-                Not listening right now.
-              </div>
-            </div>
-          `;
-        }
-
-        box.innerHTML = html;
-
       } catch (error) {
         box.innerHTML = "Discord status failed to load.";
       }
     }
 
-    async function loadSpotifyHistory() {
-      const box = document.getElementById("spotify-history");
+    async function loadNowPlaying() {
+      const box = document.getElementById("lastfm-nowplaying");
+
+      if (!box) return;
 
       try {
-        const url = `https://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user=${lastfmUsername}&api_key=${lastfmApiKey}&format=json&limit=5`;
+        const url = `https://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user=${lastfmUsername}&api_key=${lastfmApiKey}&format=json&limit=1`;
+
         const response = await fetch(url);
         const data = await response.json();
 
-        if (!data.recenttracks || !data.recenttracks.track) {
-          box.innerHTML = "No Spotify history found. Make sure Spotify scrobbling is enabled on Last.fm.";
+        const track = data.recenttracks?.track?.[0];
+
+        if (!track) {
+          box.innerHTML = "No Spotify activity.";
           return;
         }
 
-        const tracks = data.recenttracks.track;
+        const isNowPlaying = track["@attr"] && track["@attr"].nowplaying;
+        const image = track.image?.[2]?.["#text"] || "";
+        const artist = track.artist["#text"];
+        const trackUrl = track.url || `https://open.spotify.com/search/${encodeURIComponent(track.name + " " + artist)}`;
+
+        box.innerHTML = `
+          <a class="spotify-box" href="${trackUrl}" target="_blank" rel="noopener">
+            ${image ? `<img src="${image}" alt="Album art">` : ""}
+
+            <div class="track-info">
+              <strong>${isNowPlaying ? "Currently Listening" : "Last Played"}</strong><br>
+              ${track.name}<br>
+              <small>${artist}</small>
+            </div>
+          </a>
+        `;
+      } catch (error) {
+        box.innerHTML = "Spotify status failed to load.";
+      }
+    }
+
+    async function loadMoodFromSongs() {
+  const moodBox = document.getElementById("auto-mood");
+  if (!moodBox) return;
+
+  try {
+    const url = `https://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user=${lastfmUsername}&api_key=${lastfmApiKey}&format=json&limit=5`;
+    const response = await fetch(url);
+    const data = await response.json();
+
+    const tracks = data.recenttracks?.track || [];
+
+    const songText = tracks
+      .map(track => `${track.name} ${track.artist["#text"]}`)
+      .join(" ")
+      .toLowerCase();
+
+    let mood = "mysterious, iconic, and mildly dramatic";
+
+    if (songText.includes("sad") || songText.includes("cry") || songText.includes("lonely")) {
+      mood = "sad girl hours but still iconic";
+    } else if (songText.includes("party") || songText.includes("dance") || songText.includes("club")) {
+      mood = "party mode, absolutely causing chaos";
+    } else if (songText.includes("love") || songText.includes("heart")) {
+      mood = "romantic, delusional, and thriving";
+    } else if (songText.includes("rage") || songText.includes("kill") || songText.includes("bad")) {
+      mood = "angry but serving";
+    } else if (songText.includes("pink") || songText.includes("girl") || songText.includes("pop")) {
+      mood = "cunty pop diva energy";
+    }
+
+    moodBox.textContent = mood;
+
+  } catch (error) {
+    moodBox.textContent = "too mysterious to analyse";
+  }
+}
+
+    async function loadSpotifyHistory() {
+      const box = document.getElementById("spotify-history");
+
+      if (!box) return;
+
+      try {
+        const url = `https://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user=${lastfmUsername}&api_key=${lastfmApiKey}&format=json&limit=5`;
+
+        const response = await fetch(url);
+        const data = await response.json();
+
+        const tracks = data.recenttracks?.track || [];
 
         let html = "";
 
@@ -646,6 +889,7 @@ updateTabFromDiscord();
 
           if (!isNowPlaying && track.date && track.date.uts) {
             const playedDate = new Date(track.date.uts * 1000);
+
             timeText = playedDate.toLocaleString([], {
               day: "2-digit",
               month: "short",
@@ -657,6 +901,7 @@ updateTabFromDiscord();
           html += `
             <a class="track" href="${trackUrl}" target="_blank" rel="noopener">
               ${image ? `<img src="${image}" alt="Album art">` : ""}
+
               <div class="track-info">
                 <strong>${isNowPlaying ? "Now Playing" : "Recently Played"}</strong><br>
                 ${track.name}<br>
@@ -668,17 +913,26 @@ updateTabFromDiscord();
         });
 
         box.innerHTML = html || "No Spotify history found.";
-
       } catch (error) {
         box.innerHTML = "Spotify history failed to load.";
       }
     }
 
-    loadDiscord();
-    loadSpotifyHistory();
+    document.querySelectorAll(".xp-window").forEach(makeDraggable);
 
+    updateTabFromDiscord();
+    updateClock();
+
+   loadDiscord();
+loadNowPlaying();
+loadSpotifyHistory();
+loadMoodFromSongs();
+
+    setInterval(updateClock, 1000);
     setInterval(loadDiscord, 15000);
+    setInterval(loadNowPlaying, 30000);
     setInterval(loadSpotifyHistory, 60000);
+    setInterval(loadMoodFromSongs, 60000);
   </script>
 
 </body>
