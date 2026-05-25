@@ -63,12 +63,10 @@ No quotation marks.
         const geminiData =
           await gemini.json();
 
-        const mood =
-          geminiData
-            ?.candidates?.[0]
-            ?.content?.parts?.[0]
-            ?.text ||
-          "emotionally unavailable";
+    const mood =
+  geminiData?.error?.message ||
+  geminiData?.candidates?.[0]?.content?.parts?.[0]?.text ||
+  "emotionally unavailable";
 
         return new Response(
           JSON.stringify({ mood }),
