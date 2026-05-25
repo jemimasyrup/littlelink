@@ -827,8 +827,31 @@
       }
     }
 
-    async function loadMoodFromSongs() {
-  const moodBox = document.getElementById("auto-mood");
+async function loadMoodFromSongs() {
+
+  const moodBox =
+    document.getElementById("auto-mood");
+
+  if (!moodBox) return;
+
+  try {
+
+    const response =
+      await fetch("/api/mood");
+
+    const data =
+      await response.json();
+
+    moodBox.textContent =
+      data.mood;
+
+  } catch (error) {
+
+    moodBox.textContent =
+      "emotionally unavailable";
+
+  }
+}  const moodBox = document.getElementById("auto-mood");
   if (!moodBox) return;
 
   try {
