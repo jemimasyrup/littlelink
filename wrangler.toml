@@ -1,6 +1,8 @@
 name = "littlelink"
+main = "worker.js"
 compatibility_date = "2025-01-27"
 
 [assets]
 directory = "./"
+binding = "ASSETS"
 html_handling = "auto-trailing-slash"
