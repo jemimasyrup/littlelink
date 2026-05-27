@@ -510,7 +510,9 @@
       <img src="images/icons/Roblox_Logo.svg" alt="Roblox">
       Roblox
     </a>
+
   </div>
+
 
   <div class="xp-window" id="main-window">
     <div class="xp-titlebar">
@@ -558,6 +560,9 @@
         <a class="button button-default" href="https://www.roblox.com/users/9760396757/profile" target="_blank" rel="noopener">
           <img class="icon" src="images/icons/Roblox_Logo.svg" alt="Roblox"> Wee Roblox
         </a>
+            <a class="button button-default" href="guestbook.html" role="button">
+  <img class="icon" src="images/icons/generic-email.svg" alt="Guestbook Icon"> Guestbook
+</a>
       </div>
 
       <footer>
@@ -791,18 +796,43 @@ if (status === "offline") {
         
 const activeDevices = [];
 
-if (data.discord.active_on_discord_desktop)
-  activeDevices.push("desktop");
+if (data.data.active_on_discord_desktop)
+  activeDevices.push("Desktop");
 
-if (data.discord.active_on_discord_mobile)
-  activeDevices.push("mobile");
+if (data.data.active_on_discord_mobile)
+  activeDevices.push("Mobile");
 
-if (data.discord.active_on_discord_web)
-  activeDevices.push("web");
+if (data.data.active_on_discord_web)
+  activeDevices.push("Web");
 
-const deviceText = activeDevices.length
-  ? `<br><small>Active on Discord ${activeDevices.join(", ")}</small>`
-  : "";
+let deviceText = "";
+
+if (activeDevices.length) {
+
+  let activeSince = "";
+
+  if (data.data.listening_to_spotify && data.data.spotify?.timestamps?.start) {
+
+    const started = new Date(data.data.spotify.timestamps.start);
+    const mins =
+      Math.floor((Date.now() - started.getTime()) / 60000);
+
+    activeSince =
+      mins > 0
+        ? ` · active for ${mins} min`
+        : "";
+  }
+
+  deviceText = `
+    <br>
+    <small style="
+      color:#555;
+      font-style:italic;
+    ">
+      Online on ${activeDevices.join(" & ")}${activeSince}
+    </small>
+  `;
+}
 
         box.innerHTML = `
           <div class="discord-user">

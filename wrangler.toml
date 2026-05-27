@@ -1,6 +1,13 @@
 name = "littlelink"
+main = "worker.js"
 compatibility_date = "2025-01-27"
 
 [assets]
 directory = "./"
+binding = "ASSETS"
 html_handling = "auto-trailing-slash"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "littlelink-db"
+database_id = "398eb4c0-0096-4928-90cc-c99fddbe5e0d"

@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Guestbook - wee.luke</title>
+  <style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: url("grass.png") center center / cover no-repeat fixed;
+      font-family: Tahoma, Verdana, sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .xp-window {
+      width: 520px;
+      max-width: calc(100vw - 30px);
+      background: #ece9d8;
+      border: 3px solid #0054e3;
+      border-radius: 10px 10px 4px 4px;
+      box-shadow: 8px 8px 0 rgba(0,0,0,0.25);
+      overflow: hidden;
+    }
+
+    .xp-titlebar {
+      background: linear-gradient(to bottom, #3f8cff, #0054e3);
+      color: white;
+      padding: 8px 12px;
+      font-weight: bold;
+      display: flex;
+      justify-content: space-between;
+      text-shadow: 1px 1px #003c9e;
+    }
+
+    .xp-content {
+      padding: 18px;
+    }
+
+    input, textarea {
+      width: 100%;
+      box-sizing: border-box;
+      margin-bottom: 10px;
+      padding: 8px;
+      border: 2px inset white;
+      font-family: Tahoma, Verdana, sans-serif;
+    }
+
+    textarea {
+      min-height: 80px;
+      resize: vertical;
+    }
+
+    button, a.button {
+      display: inline-block;
+      padding: 8px 14px;
+      background: linear-gradient(to bottom, #ffffff, #d6d2c2);
+      border: 2px outset white;
+      color: black;
+      text-decoration: none;
+      font-weight: bold;
+      font-family: Tahoma, Verdana, sans-serif;
+      margin-right: 6px;
+    }
+
+    .message {
+      margin-top: 10px;
+      padding: 10px;
+      background: #fff;
+      border: 2px inset white;
+      font-size: 13px;
+    }
+
+    .message small {
+      color: #555;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="xp-window">
+    <div class="xp-titlebar">
+      <span>Guestbook.exe</span>
+      <span>_ □ X</span>
+    </div>
+<input id="website" style="display:none" autocomplete="off">
+
+    <div class="xp-content">
+      <h2>Sign my guestbook</h2>
+
+      <input id="name" placeholder="Your name">
+      <textarea id="message" placeholder="Say something iconic..."></textarea>
+
+      <button onclick="signGuestbook()">Sign Guestbook</button>
+      <a class="button" href="index.html">Back</a>
+
+      <div id="messages"></div>
+    </div>
+  </div>
+
+ <script>
+  async function loadGuestbook() {
+    const box = document.getElementById("messages");
+
+    const response = await fetch("/api/guestbook");
+    const messages = await response.json();
+
+    box.innerHTML = messages.map(item => `
+      <div class="message">
+        <strong>${escapeHTML(item.name)}</strong><br>
+        ${escapeHTML(item.message)}<br>
+        <small>${new Date(item.created_at).toLocaleString()}</small>
+      </div>
+    `).join("");
+  }
+
+  async function signGuestbook() {
+    const name = document.getElementById("name").value;
+    const message = document.getElementById("message").value;
+    const website = document.getElementById("website").value;
+
+    await fetch("/api/guestbook", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        name,
+        message,
+        website
+      })
+    });
+
+    document.getElementById("name").value = "";
+    document.getElementById("message").value = "";
+
+    loadGuestbook();
+  }
+
+  function escapeHTML(text) {
+    return String(text)
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+  }
+
+  loadGuestbook();
+</script>
+</body>
+</html>
