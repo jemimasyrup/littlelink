@@ -748,6 +748,28 @@
 
         const user = data.data.discord_user;
         const status = data.data.discord_status || "offline";
+        const previousStatus = localStorage.getItem("lastDiscordStatus");
+const lastOfflineAt = localStorage.getItem("lastOfflineAt");
+
+if (previousStatus && previousStatus !== "offline" && status === "offline") {
+  localStorage.setItem("lastOfflineAt", new Date().toISOString());
+}
+
+localStorage.setItem("lastDiscordStatus", status);
+
+let offlineText = "";
+
+if (status === "offline") {
+  const savedOffline = localStorage.getItem("lastOfflineAt");
+
+  if (savedOffline) {
+    const offlineDate = new Date(savedOffline);
+    offlineText = `<br><small>Went offline at ${offlineDate.toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit"
+    })}</small>`;
+  }
+}
 
         let statusClass = "offline";
 
@@ -766,6 +788,21 @@
         if (customStatus) {
           customStatusText = customStatus.state || customStatus.name || "";
         }
+        
+const activeDevices = [];
+
+if (data.discord.active_on_discord_desktop)
+  activeDevices.push("desktop");
+
+if (data.discord.active_on_discord_mobile)
+  activeDevices.push("mobile");
+
+if (data.discord.active_on_discord_web)
+  activeDevices.push("web");
+
+const deviceText = activeDevices.length
+  ? `<br><small>Active on Discord ${activeDevices.join(", ")}</small>`
+  : "";
 
         box.innerHTML = `
           <div class="discord-user">
@@ -774,12 +811,14 @@
             <div>
               <strong>${user.username}</strong><br>
 
-              <span class="status-dot ${statusClass}"></span>
-              ${status === "offline" ? "offline" : status}
+<span class="status-dot ${statusClass}"></span>
+${status === "offline" ? "offline" : status}
+${offlineText}
 
               ${status !== "offline" && customStatusText
                 ? `<br><small>${customStatusText}</small>`
                 : ""}
+              ${deviceText}
             </div>
           </div>
         `;
