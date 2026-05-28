@@ -563,6 +563,10 @@
             <a class="button button-default" href="guestbook.html" role="button">
   <img class="icon" src="images/icons/generic-email.svg" alt="Guestbook Icon"> Guestbook
 </a>
+
+<a class="button button-default" href="archive.html" role="button">
+  <img class="icon" src="images/icons/spotify.svg" alt="Music Archive Icon"> Music Archive
+</a>
       </div>
 
       <footer>
@@ -631,29 +635,38 @@
 
     let highestZ = 10;
 
-    function loginXP() {
-      const login = document.getElementById("xpLogin");
-      const startup = document.getElementById("startupSound");
-      const music = document.getElementById("bgmusic");
+function loginXP() {
+  const login = document.getElementById("xpLogin");
+  const startup = document.getElementById("startupSound");
+  const music = document.getElementById("bgmusic");
 
-      if (startup) {
-        startup.volume = 0.7;
-        startup.play();
-      }
+  sessionStorage.setItem("xpLoggedIn", "true");
 
-      setTimeout(() => {
-        if (music) {
-          music.volume = 0.25;
-          music.play();
-        }
-      }, 4500);
+  if (startup) {
+    startup.volume = 0.7;
+    startup.play();
+  }
 
-      login.style.opacity = "0";
-
-      setTimeout(() => {
-        login.remove();
-      }, 700);
+  setTimeout(() => {
+    if (music) {
+      music.volume = 0.25;
+      music.play();
     }
+  }, 4500);
+
+  login.style.opacity = "0";
+
+  setTimeout(() => {
+    login.remove();
+  }, 700);
+}
+window.addEventListener("DOMContentLoaded", () => {
+  if (sessionStorage.getItem("xpLoggedIn") === "true") {
+    const login = document.getElementById("xpLogin");
+    if (login) login.remove();
+  }
+});
+
 
     async function updateTabFromDiscord() {
       try {
