@@ -150,16 +150,38 @@
       text-shadow: none;
     }
 
-    .xp-content {
-      padding: 24px;
-      text-align: center;
-    }
+  .xp-content {
+  padding: 18px;
+  text-align: center;
+}
 
-    #main-window {
-      top: 40px;
-      left: 50%;
-      transform: translateX(-50%);
-    }
+#main-window .avatar {
+  width: 96px;
+  height: 96px;
+}
+
+#main-window h1 {
+  font-size: 24px;
+  margin-top: 14px;
+}
+
+#main-window .button {
+  min-height: 42px;
+  margin-bottom: 10px;
+}
+
+#main-window footer {
+  margin-top: 18px;
+}
+
+#main-window {
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 460px;
+  max-height: calc(100vh - 60px);
+  overflow-y: auto;
+}
 
     #status-window {
       top: 80px;
@@ -535,12 +557,7 @@
       <p>You can see my PUBLIC socials below.</p>
       <p style="margin-bottom: 20px;">Please don't hesitate to reach out at me@weeluke.co.uk!</p>
 
-      <div class="mood-widget">
-  <strong>Current Mood:</strong><br>
-  <span id="auto-mood">Analysing my last songs...</span>
-</div>
 
-      <div class="button-stack" role="navigation">
         <a class="button button-discord" href="https://discord.com/users/783776027846639688" target="_blank" rel="noopener">
           <img class="icon" src="images/icons/discord.svg" alt="Discord Logo"> Discord
         </a>
@@ -984,13 +1001,11 @@ async function loadMoodFromSongs() {
    loadDiscord();
 loadNowPlaying();
 loadSpotifyHistory();
-loadMoodFromSongs();
 
     setInterval(updateClock, 1000);
     setInterval(loadDiscord, 15000);
     setInterval(loadNowPlaying, 30000);
     setInterval(loadSpotifyHistory, 60000);
-    setInterval(loadMoodFromSongs, 60000);
   </script>
 
 </body>
