@@ -150,16 +150,38 @@
       text-shadow: none;
     }
 
-    .xp-content {
-      padding: 24px;
-      text-align: center;
-    }
+  .xp-content {
+  padding: 18px;
+  text-align: center;
+}
 
-    #main-window {
-      top: 40px;
-      left: 50%;
-      transform: translateX(-50%);
-    }
+#main-window .avatar {
+  width: 96px;
+  height: 96px;
+}
+
+#main-window h1 {
+  font-size: 24px;
+  margin-top: 14px;
+}
+
+#main-window .button {
+  min-height: 42px;
+  margin-bottom: 10px;
+}
+
+#main-window footer {
+  margin-top: 18px;
+}
+
+#main-window {
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 460px;
+  max-height: calc(100vh - 60px);
+  overflow-y: auto;
+}
 
     #status-window {
       top: 80px;
@@ -510,7 +532,9 @@
       <img src="images/icons/Roblox_Logo.svg" alt="Roblox">
       Roblox
     </a>
+
   </div>
+
 
   <div class="xp-window" id="main-window">
     <div class="xp-titlebar">
@@ -533,12 +557,7 @@
       <p>You can see my PUBLIC socials below.</p>
       <p style="margin-bottom: 20px;">Please don't hesitate to reach out at me@weeluke.co.uk!</p>
 
-      <div class="mood-widget">
-  <strong>Current Mood:</strong><br>
-  <span id="auto-mood">Analysing my last songs...</span>
-</div>
 
-      <div class="button-stack" role="navigation">
         <a class="button button-discord" href="https://discord.com/users/783776027846639688" target="_blank" rel="noopener">
           <img class="icon" src="images/icons/discord.svg" alt="Discord Logo"> Discord
         </a>
@@ -558,6 +577,13 @@
         <a class="button button-default" href="https://www.roblox.com/users/9760396757/profile" target="_blank" rel="noopener">
           <img class="icon" src="images/icons/Roblox_Logo.svg" alt="Roblox"> Wee Roblox
         </a>
+            <a class="button button-default" href="guestbook.html" role="button">
+  <img class="icon" src="images/icons/generic-email.svg" alt="Guestbook Icon"> Guestbook
+</a>
+
+<a class="button button-default" href="archive.html" role="button">
+  <img class="icon" src="images/icons/spotify.svg" alt="Music Archive Icon"> Music Archive
+</a>
       </div>
 
       <footer>
@@ -626,29 +652,38 @@
 
     let highestZ = 10;
 
-    function loginXP() {
-      const login = document.getElementById("xpLogin");
-      const startup = document.getElementById("startupSound");
-      const music = document.getElementById("bgmusic");
+function loginXP() {
+  const login = document.getElementById("xpLogin");
+  const startup = document.getElementById("startupSound");
+  const music = document.getElementById("bgmusic");
 
-      if (startup) {
-        startup.volume = 0.7;
-        startup.play();
-      }
+  sessionStorage.setItem("xpLoggedIn", "true");
 
-      setTimeout(() => {
-        if (music) {
-          music.volume = 0.25;
-          music.play();
-        }
-      }, 4500);
+  if (startup) {
+    startup.volume = 0.7;
+    startup.play();
+  }
 
-      login.style.opacity = "0";
-
-      setTimeout(() => {
-        login.remove();
-      }, 700);
+  setTimeout(() => {
+    if (music) {
+      music.volume = 0.25;
+      music.play();
     }
+  }, 4500);
+
+  login.style.opacity = "0";
+
+  setTimeout(() => {
+    login.remove();
+  }, 700);
+}
+window.addEventListener("DOMContentLoaded", () => {
+  if (sessionStorage.getItem("xpLoggedIn") === "true") {
+    const login = document.getElementById("xpLogin");
+    if (login) login.remove();
+  }
+});
+
 
     async function updateTabFromDiscord() {
       try {
@@ -791,18 +826,43 @@ if (status === "offline") {
         
 const activeDevices = [];
 
-if (data.discord.active_on_discord_desktop)
-  activeDevices.push("desktop");
+if (data.data.active_on_discord_desktop)
+  activeDevices.push("Desktop");
 
-if (data.discord.active_on_discord_mobile)
-  activeDevices.push("mobile");
+if (data.data.active_on_discord_mobile)
+  activeDevices.push("Mobile");
 
-if (data.discord.active_on_discord_web)
-  activeDevices.push("web");
+if (data.data.active_on_discord_web)
+  activeDevices.push("Web");
 
-const deviceText = activeDevices.length
-  ? `<br><small>Active on Discord ${activeDevices.join(", ")}</small>`
-  : "";
+let deviceText = "";
+
+if (activeDevices.length) {
+
+  let activeSince = "";
+
+  if (data.data.listening_to_spotify && data.data.spotify?.timestamps?.start) {
+
+    const started = new Date(data.data.spotify.timestamps.start);
+    const mins =
+      Math.floor((Date.now() - started.getTime()) / 60000);
+
+    activeSince =
+      mins > 0
+        ? ` · active for ${mins} min`
+        : "";
+  }
+
+  deviceText = `
+    <br>
+    <small style="
+      color:#555;
+      font-style:italic;
+    ">
+      Online on ${activeDevices.join(" & ")}${activeSince}
+    </small>
+  `;
+}
 
         box.innerHTML = `
           <div class="discord-user">
@@ -941,13 +1001,11 @@ async function loadMoodFromSongs() {
    loadDiscord();
 loadNowPlaying();
 loadSpotifyHistory();
-loadMoodFromSongs();
 
     setInterval(updateClock, 1000);
     setInterval(loadDiscord, 15000);
     setInterval(loadNowPlaying, 30000);
     setInterval(loadSpotifyHistory, 60000);
-    setInterval(loadMoodFromSongs, 60000);
   </script>
 
 </body>

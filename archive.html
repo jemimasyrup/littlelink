@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Music Archive - wee.luke</title>
+
+  <style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: url("grass.png") center center / cover no-repeat fixed;
+      font-family: Tahoma, Verdana, sans-serif;
+      display: flex;
+      justify-content: center;
+      padding: 40px 0;
+    }
+
+    .xp-window {
+      width: 620px;
+      max-width: calc(100vw - 30px);
+      background: #ece9d8;
+      border: 3px solid #0054e3;
+      border-radius: 10px 10px 4px 4px;
+      box-shadow: 8px 8px 0 rgba(0,0,0,0.25);
+      overflow: hidden;
+    }
+
+    .xp-titlebar {
+      background: linear-gradient(to bottom, #3f8cff, #0054e3);
+      color: white;
+      padding: 8px 12px;
+      font-weight: bold;
+      display: flex;
+      justify-content: space-between;
+      text-shadow: 1px 1px #003c9e;
+    }
+
+    .xp-content {
+      padding: 18px;
+    }
+
+    h2, h3 {
+      margin-top: 0;
+    }
+
+    button, a.button {
+      display: inline-block;
+      padding: 8px 14px;
+      background: linear-gradient(to bottom, #ffffff, #d6d2c2);
+      border: 2px outset white;
+      color: black;
+      text-decoration: none;
+      font-weight: bold;
+      font-family: Tahoma, Verdana, sans-serif;
+      margin: 0 6px 12px 0;
+      cursor: pointer;
+    }
+
+    .section {
+      margin-top: 14px;
+      padding: 10px;
+      background: #ece9d8;
+      border: 2px inset white;
+    }
+
+    .track {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      background: white;
+      border: 2px inset white;
+      padding: 8px;
+      margin-top: 8px;
+      color: black;
+      text-decoration: none;
+      font-size: 13px;
+    }
+
+    .track:hover {
+      background: #fff8cc;
+    }
+
+    .track img {
+      width: 52px;
+      height: 52px;
+      border-radius: 6px;
+      object-fit: cover;
+      border: 2px solid white;
+      outline: 1px solid #0054e3;
+      flex-shrink: 0;
+    }
+
+    .track-info {
+      line-height: 1.35;
+      word-break: break-word;
+    }
+
+    small {
+      color: #555;
+    }
+
+    .empty {
+      padding: 8px;
+      background: white;
+      border: 2px inset white;
+      margin-top: 8px;
+      font-size: 13px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="xp-window">
+    <div class="xp-titlebar">
+      <span>MusicArchive.exe</span>
+      <span>_ □ X</span>
+    </div>
+
+    <div class="xp-content">
+      <h2>Music Archive</h2>
+
+      <button onclick="updateArchive()">Update archive</button>
+      <a class="button" href="index.html">Back</a>
+
+      <div class="section">
+        <h3>Top songs this week</h3>
+        <div id="top-week">Loading...</div>
+      </div>
+
+      <div class="section">
+        <h3>Top songs this month</h3>
+        <div id="top-month">Loading...</div>
+      </div>
+
+      <div class="section">
+        <h3>Recently archived</h3>
+        <div id="recent">Loading...</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    async function updateArchive() {
+      await fetch("/api/archive/update");
+      await loadArchive();
+      alert("Archive updated!");
+    }
+
+    async function loadTop(range, elementId) {
+      const box = document.getElementById(elementId);
+
+      try {
+        const response = await fetch(`/api/archive/top?range=${range}`);
+        const tracks = await response.json();
+
+        if (!tracks.length) {
+          box.innerHTML = `<div class="empty">No songs archived yet. Press Update archive.</div>`;
+          return;
+        }
+
+        box.innerHTML = tracks.map(track => trackHTML(track, true)).join("");
+      } catch {
+        box.innerHTML = `<div class="empty">Failed to load top songs.</div>`;
+      }
+    }
+
+    async function loadRecent() {
+      const box = document.getElementById("recent");
+
+      try {
+        const response = await fetch("/api/archive/recent");
+        const tracks = await response.json();
+
+        if (!tracks.length) {
+          box.innerHTML = `<div class="empty">No recent songs archived yet.</div>`;
+          return;
+        }
+
+        box.innerHTML = tracks.map(track => trackHTML(track, false)).join("");
+      } catch {
+        box.innerHTML = `<div class="empty">Failed to load recent songs.</div>`;
+      }
+    }
+
+    function trackHTML(track, showPlays) {
+      const art = track.album_art || "images/icons/spotify.svg";
+      const url = track.track_url || "#";
+
+      const playedTime = track.played_at
+        ? new Date(track.played_at).toLocaleString()
+        : "";
+
+      return `
+        <a class="track" href="${escapeHTML(url)}" target="_blank" rel="noopener">
+          <img src="${escapeHTML(art)}" alt="Album art">
+
+          <div class="track-info">
+            <strong>${escapeHTML(track.track_name)}</strong><br>
+            <small>${escapeHTML(track.artist)}</small><br>
+            ${
+              showPlays
+                ? `<small>${track.plays} play${track.plays === 1 ? "" : "s"}</small>`
+                : `<small>${escapeHTML(playedTime)}</small>`
+            }
+          </div>
+        </a>
+      `;
+    }
+
+    function escapeHTML(text) {
+      return String(text || "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    async function loadArchive() {
+      await loadTop("week", "top-week");
+      await loadTop("month", "top-month");
+      await loadRecent();
+    }
+
+    loadArchive();
+  </script>
+</body>
+</html>
