@@ -2,48 +2,6 @@ export default {
   async fetch(request, env) {
     const url = new URL(request.url);
 
-<<<<<<< HEAD
-    // DISCORD STATUS + KV API
-    if (url.pathname === "/api/discord") {
-      const discordId = "783776027846639688";
-
-      try {
-        const res = await fetch(`https://api.lanyard.rest/v1/users/${discordId}`);
-        const data = await res.json();
-
-        if (!data.success) {
-          return Response.json({
-            error: "Discord failed"
-          });
-        }
-
-        const status = data.data.discord_status || "offline";
-
-        const oldStatus = await env.STATUS_KV.get("discord_status");
-
-        if (oldStatus !== "offline" && status === "offline") {
-          await env.STATUS_KV.put("last_offline_at", new Date().toISOString());
-        }
-
-        await env.STATUS_KV.put("discord_status", status);
-
-        const lastOfflineAt = await env.STATUS_KV.get("last_offline_at");
-
-        return Response.json({
-          status,
-          lastOfflineAt,
-          discord: data.data
-        });
-
-      } catch (error) {
-        return Response.json({
-          error: error.toString()
-        });
-      }
-    }
-
-    // GEMINI MOOD API
-=======
     // Guestbook - get messages
     if (url.pathname === "/api/guestbook" && request.method === "GET") {
       const messages = await env.DB.prepare(
@@ -69,15 +27,17 @@ export default {
         );
       }
 
-      await env.DB.prepare(
-        "INSERT INTO guestbook (name, message) VALUES (?, ?)"
-      ).bind(name, message).run();
+const ip =
+  request.headers.get("CF-Connecting-IP") || "unknown";
+
+await env.DB.prepare(
+  "INSERT INTO guestbook (name, message, ip) VALUES (?, ?, ?)"
+).bind(name, message, ip).run();
 
       return Response.json({ success: true });
     }
 
     // Gemini mood API
->>>>>>> ffe44476a1ea1e5628e2e3736bef1a5dfdcec62c
     if (url.pathname === "/api/mood") {
       try {
         const LASTFM_KEY = "be3c5d62a114a966685354a725e8738e";
@@ -128,25 +88,12 @@ No quotation marks.
           geminiData?.candidates?.[0]?.content?.parts?.[0]?.text ||
           "emotionally unavailable";
 
-<<<<<<< HEAD
-        return Response.json({
-          mood
-        });
-
-      } catch (error) {
-        return Response.json({
-          mood: error.toString()
-        });
-      }
-    }
-// MUSIC ARCHIVE - update from Last.fm
-=======
         return Response.json({ mood });
       } catch (error) {
         return Response.json({ mood: error.toString() });
       }
     }
->>>>>>> ffe44476a1ea1e5628e2e3736bef1a5dfdcec62c
+// MUSIC ARCHIVE - update from Last.fm
 if (url.pathname === "/api/archive/update") {
   const LASTFM_KEY = "be3c5d62a114a966685354a725e8738e";
   const LASTFM_USER = "hp173011";
@@ -158,18 +105,20 @@ if (url.pathname === "/api/archive/update") {
   const data = await response.json();
   const tracks = data.recenttracks?.track || [];
 
+  let inserted = 0;
+
   for (const track of tracks) {
     if (track["@attr"]?.nowplaying) continue;
+    if (!track.date?.uts) continue;
 
-    const trackName = track.name;
+    const trackName = track.name || "";
     const artist = track.artist?.["#text"] || "";
     const albumArt = track.image?.[2]?.["#text"] || "";
     const trackUrl = track.url || "";
-    const playedAt = track.date?.uts
-      ? new Date(Number(track.date.uts) * 1000).toISOString()
-      : new Date().toISOString();
+    const playedAt = new Date(Number(track.date.uts) * 1000).toISOString();
 
-<<<<<<< HEAD
+    const uniqueKey = `${trackName}|${artist}|${track.date.uts}`;
+
     const existing = await env.DB.prepare(`
       SELECT id
       FROM nowplaying_archive
@@ -185,60 +134,15 @@ if (url.pathname === "/api/archive/update") {
         (track_name, artist, album_art, track_url, played_at)
         VALUES (?, ?, ?, ?, ?)
       `).bind(trackName, artist, albumArt, trackUrl, playedAt).run();
+
+      inserted++;
     }
-=======
-    await env.DB.prepare(`
-      INSERT INTO nowplaying_archive
-      (track_name, artist, album_art, track_url, played_at)
-      VALUES (?, ?, ?, ?, ?)
-    `).bind(trackName, artist, albumArt, trackUrl, playedAt).run();
->>>>>>> ffe44476a1ea1e5628e2e3736bef1a5dfdcec62c
   }
 
-  return Response.json({ success: true });
-}
-
-<<<<<<< HEAD
-// MUSIC ARCHIVE - top songs
-if (url.pathname === "/api/archive/top") {
-  const range = url.searchParams.get("range") || "week";
-=======
-if (url.pathname === "/api/archive/top") {
-  const range = url.searchParams.get("range") || "week";
-
->>>>>>> ffe44476a1ea1e5628e2e3736bef1a5dfdcec62c
-  const days = range === "month" ? 30 : 7;
-
-  const result = await env.DB.prepare(`
-    SELECT
-      track_name,
-      artist,
-      album_art,
-      track_url,
-      COUNT(*) as plays
-    FROM nowplaying_archive
-    WHERE datetime(played_at) >= datetime('now', ?)
-    GROUP BY track_name, artist
-    ORDER BY plays DESC
-    LIMIT 10
-  `).bind(`-${days} days`).all();
-
-  return Response.json(result.results);
-}
-
-<<<<<<< HEAD
-// MUSIC ARCHIVE - recent songs
-=======
->>>>>>> ffe44476a1ea1e5628e2e3736bef1a5dfdcec62c
-if (url.pathname === "/api/archive/recent") {
-  const result = await env.DB.prepare(`
-    SELECT track_name, artist, album_art, track_url, played_at
-    FROM nowplaying_archive
-    ORDER BY datetime(played_at) DESC
-    LIMIT 30
-  `).all();
-
-  return Response.json(result.results);
+  return Response.json({
+    success: true,
+    inserted
+  });
 }
     return env.ASSETS.fetch(request);
   }
