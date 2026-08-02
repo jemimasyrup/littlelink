@@ -93,6 +93,28 @@ No quotation marks.
         return Response.json({ mood: error.toString() });
       }
     }
+// Discord API
+if (url.pathname === "/api/discord") {
+  const discordId = "783776027846639688";
+
+  const res = await fetch(`https://api.lanyard.rest/v1/users/${discordId}`);
+  const json = await res.json();
+
+  if (!json.success) {
+    return Response.json({ error: "Discord failed" });
+  }
+
+  const d = json.data;
+
+  return Response.json({
+    status: d.discord_status,
+    discord_user: d.discord_user,
+    activities: d.activities,
+    listening_to_spotify: d.listening_to_spotify,
+    spotify: d.spotify
+  });
+}
+
 // MUSIC ARCHIVE - update from Last.fm
 if (url.pathname === "/api/archive/update") {
   const LASTFM_KEY = "be3c5d62a114a966685354a725e8738e";
