@@ -1,3 +1,7 @@
+-- worker.js creates anything missing here automatically when it starts,
+-- so this file is a reference for the database layout rather than a
+-- required setup step.
+
 CREATE TABLE IF NOT EXISTS guestbook (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   name TEXT NOT NULL,
@@ -20,6 +24,23 @@ CREATE TABLE IF NOT EXISTS nowplaying_archive (
   album_art TEXT,
   track_url TEXT,
   played_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+
+-- One row: the current Discord status and when it last flipped between
+-- online and offline.
+CREATE TABLE IF NOT EXISTS discord_presence (
+  id INTEGER PRIMARY KEY CHECK (id = 1),
+  status TEXT NOT NULL,
+  since TEXT NOT NULL,
+  last_online_at TEXT,
+  checked_at TEXT NOT NULL,
+  payload TEXT
+);
+
+-- Small key/value store (archive sync progress)
+CREATE TABLE IF NOT EXISTS site_state (
+  key TEXT PRIMARY KEY,
+  value TEXT NOT NULL
 );
 
 CREATE INDEX IF NOT EXISTS idx_guestbook_ip

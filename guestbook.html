@@ -3,118 +3,69 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="icon" type="image/png" href="/images/avatar.png">
   <title>Guestbook - wee.luke</title>
+
+  <link rel="icon" type="image/png" href="/images/avatar.png">
+  <link rel="stylesheet" href="css/xp.css">
+
   <style>
-    body {
-      margin: 0;
-      min-height: 100vh;
-      background: #3a7d2c url("grass.jpg") center center / cover no-repeat fixed;
-      font-family: Tahoma, Verdana, sans-serif;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .xp-window {
-      width: 520px;
-      max-width: calc(100vw - 30px);
-      background: #ece9d8;
-      border: 3px solid #0054e3;
-      border-radius: 10px 10px 4px 4px;
-      box-shadow: 8px 8px 0 rgba(0,0,0,0.25);
-      overflow: hidden;
-    }
-
-    .xp-titlebar {
-      background: linear-gradient(to bottom, #3f8cff, #0054e3);
-      color: white;
-      padding: 8px 12px;
-      font-weight: bold;
-      display: flex;
-      justify-content: space-between;
-      text-shadow: 1px 1px #003c9e;
-    }
-
-    .xp-content {
-      padding: 18px;
-    }
-
-    input, textarea {
-      width: 100%;
-      box-sizing: border-box;
-      margin-bottom: 10px;
-      padding: 8px;
-      border: 2px inset white;
-      font-family: Tahoma, Verdana, sans-serif;
-    }
-
-    textarea {
-      min-height: 80px;
-      resize: vertical;
-    }
-
-    button, a.button {
-      display: inline-block;
-      padding: 8px 14px;
-      background: linear-gradient(to bottom, #ffffff, #d6d2c2);
-      border: 2px outset white;
-      color: black;
-      text-decoration: none;
-      font-weight: bold;
-      font-family: Tahoma, Verdana, sans-serif;
-      margin-right: 6px;
-    }
-
-    .message {
-      margin-top: 10px;
-      padding: 10px;
-      background: #fff;
-      border: 2px inset white;
-      font-size: 13px;
-    }
-
-    .message small {
-      color: #555;
-    }
-
-    .message {
-      word-break: break-word;
-    }
-
-    #form-status {
-      margin: 10px 0 0;
-      font-size: 13px;
-      color: #b00020;
-      min-height: 1em;
-    }
+    #guestbook-window { --window-width: 540px; }
   </style>
 </head>
 
 <body>
-  <div class="xp-window">
-    <div class="xp-titlebar">
-      <span>Guestbook.exe</span>
-      <span>_ □ X</span>
-    </div>
+  <main class="desktop desktop--single">
+    <section class="xp-window xp-window--center" id="guestbook-window" data-title="Guestbook">
+      <div class="xp-titlebar">
+        <span class="xp-title"><img src="images/icons/generic-review.svg" alt="">Guestbook</span>
+      </div>
 
-    <div class="xp-content">
-      <h2>Sign my guestbook</h2>
+      <div class="xp-content">
+        <fieldset class="xp-group">
+          <legend>Sign my guestbook</legend>
 
-      <input id="website" style="display:none" tabindex="-1" autocomplete="off" aria-hidden="true">
-      <input id="name" placeholder="Your name" maxlength="24" aria-label="Your name">
-      <textarea id="message" placeholder="Say something iconic..." maxlength="180" aria-label="Your message"></textarea>
+          <input id="website" style="display:none" tabindex="-1" autocomplete="off" aria-hidden="true">
 
-      <button id="sign-button" type="button" onclick="signGuestbook()">Sign Guestbook</button>
-      <a class="button" href="index.html">Back</a>
+          <div class="form-row">
+            <input class="xp-input" id="name" placeholder="Your name" maxlength="24" aria-label="Your name">
+          </div>
 
-      <p id="form-status" role="status"></p>
+          <div class="form-row">
+            <textarea class="xp-input" id="message" placeholder="Say something iconic..." maxlength="180" aria-label="Your message"></textarea>
+          </div>
 
-      <div id="messages"></div>
-    </div>
-  </div>
+          <div class="form-actions">
+            <button class="xp-button xp-button--default" id="sign-button" type="button" onclick="signGuestbook()">Sign Guestbook</button>
+            <a class="xp-button" href="index.html">Back</a>
+            <span class="form-count" id="message-count">0 / 180</span>
+          </div>
+
+          <p class="form-status" id="form-status" role="status"></p>
+        </fieldset>
+
+        <p class="section-label">Messages</p>
+        <div id="messages" class="xp-panel">
+          <div class="empty-state">Loading messages...</div>
+        </div>
+      </div>
+
+      <footer class="xp-statusbar">
+        <span id="message-total">&nbsp;</span>
+        <span>Be nice!</span>
+      </footer>
+    </section>
+  </main>
+
+  <script src="js/xp.js"></script>
 
   <script>
+    const messageInput = document.getElementById("message");
+    const messageCount = document.getElementById("message-count");
+
+    messageInput.addEventListener("input", () => {
+      messageCount.textContent = `${messageInput.value.length} / 180`;
+    });
+
     async function loadGuestbook() {
       const box = document.getElementById("messages");
 
@@ -125,21 +76,29 @@
 
         const messages = await response.json();
 
-        box.innerHTML = messages.map(item => `
-          <div class="message">
-            <strong>${escapeHTML(item.name)}</strong><br>
-            ${escapeHTML(item.message)}<br>
-            <small>${escapeHTML(formatDate(item.created_at))}</small>
-          </div>
-        `).join("");
+        if (!messages.length) {
+          box.innerHTML = `<div class="empty-state">No messages yet. Be the first!</div>`;
+        } else {
+          box.innerHTML = messages.map(item => `
+            <article class="guest-message">
+              <header>
+                <strong>${XP.escapeHTML(item.name)}</strong>
+                <small>${XP.escapeHTML(XP.formatWhen(item.created_at))}</small>
+              </header>
+              ${XP.escapeHTML(item.message)}
+            </article>
+          `).join("");
+        }
+
+        document.getElementById("message-total").textContent =
+          `Showing the latest ${messages.length} message${messages.length === 1 ? "" : "s"}`;
       } catch {
-        box.innerHTML = `<div class="message">Guestbook failed to load.</div>`;
+        box.innerHTML = `<div class="empty-state">Guestbook failed to load.</div>`;
       }
     }
 
     async function signGuestbook() {
       const nameInput = document.getElementById("name");
-      const messageInput = document.getElementById("message");
       const button = document.getElementById("sign-button");
       const status = document.getElementById("form-status");
 
@@ -177,6 +136,7 @@
         // Only clear the form once the message has actually been saved
         nameInput.value = "";
         messageInput.value = "";
+        messageCount.textContent = "0 / 180";
 
         await loadGuestbook();
       } catch {
@@ -184,20 +144,6 @@
       } finally {
         button.disabled = false;
       }
-    }
-
-    function formatDate(value) {
-      const date = new Date(value);
-      return isNaN(date) ? "" : date.toLocaleString();
-    }
-
-    function escapeHTML(text) {
-      return String(text ?? "")
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
     }
 
     loadGuestbook();
