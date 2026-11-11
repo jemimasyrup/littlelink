@@ -2,13 +2,15 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/png" href="/images/avatar.png">
   <title>Music Archive - wee.luke</title>
 
   <style>
     body {
       margin: 0;
       min-height: 100vh;
-      background: url("grass.png") center center / cover no-repeat fixed;
+      background: #3a7d2c url("grass.jpg") center center / cover no-repeat fixed;
       font-family: Tahoma, Verdana, sans-serif;
       display: flex;
       justify-content: center;
@@ -119,7 +121,7 @@
     <div class="xp-content">
       <h2>Music Archive</h2>
 
-      <button onclick="updateArchive()">Update archive</button>
+      <button id="update-button" type="button" onclick="updateArchive()">Update archive</button>
       <a class="button" href="index.html">Back</a>
 
       <div class="section">
@@ -141,9 +143,33 @@
 
   <script>
     async function updateArchive() {
-      await fetch("/api/archive/update");
-      await loadArchive();
-      alert("Archive updated!");
+      const button = document.getElementById("update-button");
+
+      button.disabled = true;
+
+      try {
+        const response = await fetch("/api/archive/update", { method: "POST" });
+
+        if (!response.ok) throw new Error("Request failed");
+
+        const data = await response.json();
+
+        await loadArchive();
+
+        alert(
+          data.inserted
+            ? `Archive updated! ${data.inserted} new play${data.inserted === 1 ? "" : "s"} added.`
+            : "Archive is already up to date."
+        );
+      } catch {
+        alert("Could not update the archive. Try again in a moment.");
+      } finally {
+        button.disabled = false;
+      }
+    }
+
+    function safeURL(url, fallback) {
+      return /^https?:\/\//i.test(url || "") ? url : fallback;
     }
 
     async function loadTop(range, elementId) {
@@ -151,6 +177,9 @@
 
       try {
         const response = await fetch(`/api/archive/top?range=${range}`);
+
+        if (!response.ok) throw new Error("Request failed");
+
         const tracks = await response.json();
 
         if (!tracks.length) {
@@ -169,6 +198,9 @@
 
       try {
         const response = await fetch("/api/archive/recent");
+
+        if (!response.ok) throw new Error("Request failed");
+
         const tracks = await response.json();
 
         if (!tracks.length) {
@@ -183,8 +215,9 @@
     }
 
     function trackHTML(track, showPlays) {
-      const art = track.album_art || "images/icons/spotify.svg";
-      const url = track.track_url || "#";
+      const art = safeURL(track.album_art, "images/icons/spotify.svg");
+      const url = safeURL(track.track_url, "#");
+      const plays = Number(track.plays) || 0;
 
       const playedTime = track.played_at
         ? new Date(track.played_at).toLocaleString()
@@ -199,7 +232,7 @@
             <small>${escapeHTML(track.artist)}</small><br>
             ${
               showPlays
-                ? `<small>${track.plays} play${track.plays === 1 ? "" : "s"}</small>`
+                ? `<small>${plays} play${plays === 1 ? "" : "s"}</small>`
                 : `<small>${escapeHTML(playedTime)}</small>`
             }
           </div>
@@ -217,9 +250,11 @@
     }
 
     async function loadArchive() {
-      await loadTop("week", "top-week");
-      await loadTop("month", "top-month");
-      await loadRecent();
+      await Promise.all([
+        loadTop("week", "top-week"),
+        loadTop("month", "top-month"),
+        loadRecent()
+      ]);
     }
 
     loadArchive();

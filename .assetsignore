@@ -1,4 +1,17 @@
+# Never publish source, config or repo files as static assets
 .git
 .git/**
+.github
+.do
+.wrangler
 node_modules
 node_modules/**
+docker
+functions
+worker.js
+wrangler.toml
+schema.sql
+*.md
+.gitignore
+.assetsignore
+.pre-commit-config.yaml
