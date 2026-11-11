@@ -3,261 +3,236 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="icon" type="image/png" href="/images/avatar.png">
   <title>Music Archive - wee.luke</title>
 
+  <link rel="icon" type="image/png" href="/images/avatar.png">
+  <link rel="stylesheet" href="css/xp.css">
+
   <style>
-    body {
-      margin: 0;
-      min-height: 100vh;
-      background: #3a7d2c url("grass.jpg") center center / cover no-repeat fixed;
-      font-family: Tahoma, Verdana, sans-serif;
-      display: flex;
-      justify-content: center;
-      padding: 40px 0;
-    }
-
-    .xp-window {
-      width: 620px;
-      max-width: calc(100vw - 30px);
-      background: #ece9d8;
-      border: 3px solid #0054e3;
-      border-radius: 10px 10px 4px 4px;
-      box-shadow: 8px 8px 0 rgba(0,0,0,0.25);
-      overflow: hidden;
-    }
-
-    .xp-titlebar {
-      background: linear-gradient(to bottom, #3f8cff, #0054e3);
-      color: white;
-      padding: 8px 12px;
-      font-weight: bold;
-      display: flex;
-      justify-content: space-between;
-      text-shadow: 1px 1px #003c9e;
-    }
-
-    .xp-content {
-      padding: 18px;
-    }
-
-    h2, h3 {
-      margin-top: 0;
-    }
-
-    button, a.button {
-      display: inline-block;
-      padding: 8px 14px;
-      background: linear-gradient(to bottom, #ffffff, #d6d2c2);
-      border: 2px outset white;
-      color: black;
-      text-decoration: none;
-      font-weight: bold;
-      font-family: Tahoma, Verdana, sans-serif;
-      margin: 0 6px 12px 0;
-      cursor: pointer;
-    }
-
-    .section {
-      margin-top: 14px;
-      padding: 10px;
-      background: #ece9d8;
-      border: 2px inset white;
-    }
-
-    .track {
-      display: flex;
-      gap: 10px;
-      align-items: center;
-      background: white;
-      border: 2px inset white;
-      padding: 8px;
-      margin-top: 8px;
-      color: black;
-      text-decoration: none;
-      font-size: 13px;
-    }
-
-    .track:hover {
-      background: #fff8cc;
-    }
-
-    .track img {
-      width: 52px;
-      height: 52px;
-      border-radius: 6px;
-      object-fit: cover;
-      border: 2px solid white;
-      outline: 1px solid #0054e3;
-      flex-shrink: 0;
-    }
-
-    .track-info {
-      line-height: 1.35;
-      word-break: break-word;
-    }
-
-    small {
-      color: #555;
-    }
-
-    .empty {
-      padding: 8px;
-      background: white;
-      border: 2px inset white;
-      margin-top: 8px;
-      font-size: 13px;
-    }
+    #archive-window { --window-width: 700px; }
   </style>
 </head>
 
 <body>
-  <div class="xp-window">
-    <div class="xp-titlebar">
-      <span>MusicArchive.exe</span>
-      <span>_ □ X</span>
-    </div>
-
-    <div class="xp-content">
-      <h2>Music Archive</h2>
-
-      <button id="update-button" type="button" onclick="updateArchive()">Update archive</button>
-      <a class="button" href="index.html">Back</a>
-
-      <div class="section">
-        <h3>Top songs this week</h3>
-        <div id="top-week">Loading...</div>
+  <main class="desktop desktop--single">
+    <section class="xp-window xp-window--center" id="archive-window" data-title="Music Archive">
+      <div class="xp-titlebar">
+        <span class="xp-title"><img src="images/icons/spotify.svg" alt="">Music Archive</span>
       </div>
 
-      <div class="section">
-        <h3>Top songs this month</h3>
-        <div id="top-month">Loading...</div>
+      <div class="xp-content">
+        <div class="stat-strip">
+          <div class="stat xp-panel"><b id="stat-plays">–</b><small>plays archived</small></div>
+          <div class="stat xp-panel"><b id="stat-tracks">–</b><small>different songs</small></div>
+          <div class="stat xp-panel"><b id="stat-artists">–</b><small>artists</small></div>
+        </div>
+
+        <div class="xp-tabs" role="tablist">
+          <button type="button" class="xp-tab" role="tab" data-view="week" aria-selected="true">Last 7 days</button>
+          <button type="button" class="xp-tab" role="tab" data-view="month" aria-selected="false">Last 30 days</button>
+          <button type="button" class="xp-tab" role="tab" data-view="all" aria-selected="false">All time</button>
+          <button type="button" class="xp-tab" role="tab" data-view="recent" aria-selected="false">Recent plays</button>
+        </div>
+
+        <div class="xp-tabpanel" id="archive-panel" role="tabpanel">
+          <div class="empty-state">Loading...</div>
+        </div>
       </div>
 
-      <div class="section">
-        <h3>Recently archived</h3>
-        <div id="recent">Loading...</div>
-      </div>
-    </div>
-  </div>
+      <footer class="xp-statusbar">
+        <span id="archive-status">&nbsp;</span>
+        <a href="index.html">Back to desktop</a>
+      </footer>
+    </section>
+  </main>
+
+  <script src="js/xp.js"></script>
 
   <script>
-    async function updateArchive() {
-      const button = document.getElementById("update-button");
+    const panel = document.getElementById("archive-panel");
 
-      button.disabled = true;
+    let currentView = "week";
 
-      try {
-        const response = await fetch("/api/archive/update", { method: "POST" });
-
-        if (!response.ok) throw new Error("Request failed");
-
-        const data = await response.json();
-
-        await loadArchive();
-
-        alert(
-          data.inserted
-            ? `Archive updated! ${data.inserted} new play${data.inserted === 1 ? "" : "s"} added.`
-            : "Archive is already up to date."
-        );
-      } catch {
-        alert("Could not update the archive. Try again in a moment.");
-      } finally {
-        button.disabled = false;
-      }
-    }
-
-    function safeURL(url, fallback) {
-      return /^https?:\/\//i.test(url || "") ? url : fallback;
-    }
-
-    async function loadTop(range, elementId) {
-      const box = document.getElementById(elementId);
-
-      try {
-        const response = await fetch(`/api/archive/top?range=${range}`);
-
-        if (!response.ok) throw new Error("Request failed");
-
-        const tracks = await response.json();
-
-        if (!tracks.length) {
-          box.innerHTML = `<div class="empty">No songs archived yet. Press Update archive.</div>`;
-          return;
-        }
-
-        box.innerHTML = tracks.map(track => trackHTML(track, true)).join("");
-      } catch {
-        box.innerHTML = `<div class="empty">Failed to load top songs.</div>`;
-      }
-    }
-
-    async function loadRecent() {
-      const box = document.getElementById("recent");
-
-      try {
-        const response = await fetch("/api/archive/recent");
-
-        if (!response.ok) throw new Error("Request failed");
-
-        const tracks = await response.json();
-
-        if (!tracks.length) {
-          box.innerHTML = `<div class="empty">No recent songs archived yet.</div>`;
-          return;
-        }
-
-        box.innerHTML = tracks.map(track => trackHTML(track, false)).join("");
-      } catch {
-        box.innerHTML = `<div class="empty">Failed to load recent songs.</div>`;
-      }
-    }
-
-    function trackHTML(track, showPlays) {
-      const art = safeURL(track.album_art, "images/icons/spotify.svg");
-      const url = safeURL(track.track_url, "#");
-      const plays = Number(track.plays) || 0;
-
-      const playedTime = track.played_at
-        ? new Date(track.played_at).toLocaleString()
-        : "";
+    function rowHTML({ rank, art, url, title, subtitle, meta, share }) {
+      const tag = url ? "a" : "div";
+      const link = url ? ` href="${XP.escapeHTML(url)}" target="_blank" rel="noopener"` : "";
 
       return `
-        <a class="track" href="${escapeHTML(url)}" target="_blank" rel="noopener">
-          <img src="${escapeHTML(art)}" alt="Album art">
+        <${tag} class="media-row"${link}>
+          ${rank ? `<span class="media-rank">${rank}</span>` : ""}
+          <img src="${XP.escapeHTML(art)}" alt="" loading="lazy">
 
-          <div class="track-info">
-            <strong>${escapeHTML(track.track_name)}</strong><br>
-            <small>${escapeHTML(track.artist)}</small><br>
-            ${
-              showPlays
-                ? `<small>${plays} play${plays === 1 ? "" : "s"}</small>`
-                : `<small>${escapeHTML(playedTime)}</small>`
-            }
+          <div class="media-info">
+            <strong>${XP.escapeHTML(title)}</strong>
+            ${subtitle ? `<span>${XP.escapeHTML(subtitle)}</span>` : ""}
+            ${share !== undefined ? `<div class="play-bar"><i style="width:${share}%"></i></div>` : ""}
           </div>
-        </a>
+
+          <span class="media-meta">${XP.escapeHTML(meta)}</span>
+        </${tag}>
       `;
     }
 
-    function escapeHTML(text) {
-      return String(text || "")
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
+    function playsText(plays) {
+      return `${plays} play${plays === 1 ? "" : "s"}`;
     }
 
-    async function loadArchive() {
-      await Promise.all([
-        loadTop("week", "top-week"),
-        loadTop("month", "top-month"),
-        loadRecent()
+    function topListHTML(items, toRow) {
+      if (!items.length) {
+        return `<div class="empty-state">Nothing archived for this period yet.</div>`;
+      }
+
+      const most = Number(items[0].plays) || 1;
+
+      return items.map((item, index) => {
+        const plays = Number(item.plays) || 0;
+
+        return rowHTML({
+          rank: index + 1,
+          art: XP.safeURL(item.album_art, "images/icons/spotify.svg"),
+          meta: playsText(plays),
+          share: Math.round((plays / most) * 100),
+          ...toRow(item)
+        });
+      }).join("");
+    }
+
+    async function getJSON(url) {
+      const response = await fetch(url);
+
+      if (!response.ok) throw new Error("Request failed");
+
+      return response.json();
+    }
+
+    async function showTop(range) {
+      const [tracks, artists] = await Promise.all([
+        getJSON(`/api/archive/top?range=${range}`),
+        getJSON(`/api/archive/top?range=${range}&type=artists`)
       ]);
+
+      // A slow response for a tab the visitor has already left is dropped
+      if (currentView !== range) return;
+
+      panel.innerHTML = `
+        <div class="archive-columns">
+          <div>
+            <p class="section-label">Top songs</p>
+            <div class="xp-panel">
+              ${topListHTML(tracks, track => ({
+                url: XP.safeURL(track.track_url),
+                title: track.track_name,
+                subtitle: track.artist
+              }))}
+            </div>
+          </div>
+
+          <div>
+            <p class="section-label">Top artists</p>
+            <div class="xp-panel">
+              ${topListHTML(artists, artist => ({
+                url: `https://www.last.fm/music/${encodeURIComponent(artist.artist)}`,
+                title: artist.artist
+              }))}
+            </div>
+          </div>
+        </div>
+      `;
     }
 
-    loadArchive();
+    async function showRecent() {
+      const tracks = await getJSON("/api/archive/recent");
+
+      if (currentView !== "recent") return;
+
+      panel.innerHTML = `
+        <div class="xp-panel">
+          ${tracks.length
+            ? tracks.map(track => rowHTML({
+                art: XP.safeURL(track.album_art, "images/icons/spotify.svg"),
+                url: XP.safeURL(track.track_url),
+                title: track.track_name,
+                subtitle: track.artist,
+                meta: XP.formatWhen(track.played_at)
+              })).join("")
+            : `<div class="empty-state">No plays archived yet.</div>`}
+        </div>
+      `;
+    }
+
+    async function showView(view) {
+      currentView = view;
+
+      document.querySelectorAll(".xp-tab").forEach(tab => {
+        tab.setAttribute("aria-selected", String(tab.dataset.view === view));
+      });
+
+      try {
+        await (view === "recent" ? showRecent() : showTop(view));
+      } catch {
+        if (currentView === view) {
+          panel.innerHTML = `<div class="empty-state">Failed to load the archive. Try again in a moment.</div>`;
+        }
+      }
+    }
+
+    async function loadStats() {
+      try {
+        const stats = await getJSON("/api/archive/stats");
+
+        document.getElementById("stat-plays").textContent = stats.plays.toLocaleString();
+        document.getElementById("stat-tracks").textContent = stats.tracks.toLocaleString();
+        document.getElementById("stat-artists").textContent = stats.artists.toLocaleString();
+
+        const parts = [];
+
+        if (stats.first_played_at) {
+          const first = new Date(stats.first_played_at).toLocaleDateString([], {
+            day: "numeric",
+            month: "short",
+            year: "numeric"
+          });
+
+          parts.push(`Archive starts ${first}`);
+        }
+
+        if (stats.catching_up) {
+          parts.push("still importing older plays");
+        } else if (stats.synced_at) {
+          parts.push(`updated ${XP.formatWhen(stats.synced_at)}`);
+        }
+
+        document.getElementById("archive-status").textContent = parts.join(" · ") || "Updates automatically";
+
+        return stats;
+      } catch {
+        document.getElementById("archive-status").textContent = "Updates automatically";
+        return null;
+      }
+    }
+
+    document.querySelectorAll(".xp-tab").forEach(tab => {
+      tab.addEventListener("click", () => showView(tab.dataset.view));
+    });
+
+    // The archive normally fills itself in on a schedule. If it's empty or
+    // still importing history, opening this page gives it a push.
+    async function start() {
+      showView(currentView);
+
+      const stats = await loadStats();
+
+      if (stats && (!stats.plays || stats.catching_up)) {
+        try {
+          await fetch("/api/archive/update", { method: "POST" });
+          await Promise.all([loadStats(), showView(currentView)]);
+        } catch {
+          // The schedule will catch up on its own
+        }
+      }
+    }
+
+    start();
   </script>
 </body>
 </html>
