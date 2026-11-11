@@ -2,12 +2,14 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/png" href="/images/avatar.png">
   <title>Guestbook - wee.luke</title>
   <style>
     body {
       margin: 0;
       min-height: 100vh;
-      background: url("grass.png") center center / cover no-repeat fixed;
+      background: #3a7d2c url("grass.jpg") center center / cover no-repeat fixed;
       font-family: Tahoma, Verdana, sans-serif;
       display: flex;
       align-items: center;
@@ -75,6 +77,17 @@
     .message small {
       color: #555;
     }
+
+    .message {
+      word-break: break-word;
+    }
+
+    #form-status {
+      margin: 10px 0 0;
+      font-size: 13px;
+      color: #b00020;
+      min-height: 1em;
+    }
   </style>
 </head>
 
@@ -84,70 +97,110 @@
       <span>Guestbook.exe</span>
       <span>_ □ X</span>
     </div>
-<input id="website" style="display:none" autocomplete="off">
 
     <div class="xp-content">
       <h2>Sign my guestbook</h2>
 
-      <input id="name" placeholder="Your name">
-      <textarea id="message" placeholder="Say something iconic..."></textarea>
+      <input id="website" style="display:none" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <input id="name" placeholder="Your name" maxlength="24" aria-label="Your name">
+      <textarea id="message" placeholder="Say something iconic..." maxlength="180" aria-label="Your message"></textarea>
 
-      <button onclick="signGuestbook()">Sign Guestbook</button>
+      <button id="sign-button" type="button" onclick="signGuestbook()">Sign Guestbook</button>
       <a class="button" href="index.html">Back</a>
+
+      <p id="form-status" role="status"></p>
 
       <div id="messages"></div>
     </div>
   </div>
 
- <script>
-  async function loadGuestbook() {
-    const box = document.getElementById("messages");
+  <script>
+    async function loadGuestbook() {
+      const box = document.getElementById("messages");
 
-    const response = await fetch("/api/guestbook");
-    const messages = await response.json();
+      try {
+        const response = await fetch("/api/guestbook");
 
-    box.innerHTML = messages.map(item => `
-      <div class="message">
-        <strong>${escapeHTML(item.name)}</strong><br>
-        ${escapeHTML(item.message)}<br>
-        <small>${new Date(item.created_at).toLocaleString()}</small>
-      </div>
-    `).join("");
-  }
+        if (!response.ok) throw new Error("Request failed");
 
-  async function signGuestbook() {
-    const name = document.getElementById("name").value;
-    const message = document.getElementById("message").value;
-    const website = document.getElementById("website").value;
+        const messages = await response.json();
 
-    await fetch("/api/guestbook", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        name,
-        message,
-        website
-      })
-    });
+        box.innerHTML = messages.map(item => `
+          <div class="message">
+            <strong>${escapeHTML(item.name)}</strong><br>
+            ${escapeHTML(item.message)}<br>
+            <small>${escapeHTML(formatDate(item.created_at))}</small>
+          </div>
+        `).join("");
+      } catch {
+        box.innerHTML = `<div class="message">Guestbook failed to load.</div>`;
+      }
+    }
 
-    document.getElementById("name").value = "";
-    document.getElementById("message").value = "";
+    async function signGuestbook() {
+      const nameInput = document.getElementById("name");
+      const messageInput = document.getElementById("message");
+      const button = document.getElementById("sign-button");
+      const status = document.getElementById("form-status");
+
+      const name = nameInput.value.trim();
+      const message = messageInput.value.trim();
+      const website = document.getElementById("website").value;
+
+      if (!name || !message) {
+        status.textContent = "Please enter a name and a message.";
+        return;
+      }
+
+      button.disabled = true;
+      status.textContent = "";
+
+      try {
+        const response = await fetch("/api/guestbook", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            name,
+            message,
+            website
+          })
+        });
+
+        if (!response.ok) {
+          const data = await response.json().catch(() => ({}));
+          status.textContent = data.error || "Could not sign the guestbook. Try again.";
+          return;
+        }
+
+        // Only clear the form once the message has actually been saved
+        nameInput.value = "";
+        messageInput.value = "";
+
+        await loadGuestbook();
+      } catch {
+        status.textContent = "Could not sign the guestbook. Try again.";
+      } finally {
+        button.disabled = false;
+      }
+    }
+
+    function formatDate(value) {
+      const date = new Date(value);
+      return isNaN(date) ? "" : date.toLocaleString();
+    }
+
+    function escapeHTML(text) {
+      return String(text ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
 
     loadGuestbook();
-  }
-
-  function escapeHTML(text) {
-    return String(text)
-      .replaceAll("&", "&amp;")
-      .replaceAll("<", "&lt;")
-      .replaceAll(">", "&gt;")
-      .replaceAll('"', "&quot;")
-      .replaceAll("'", "&#039;");
-  }
-
-  loadGuestbook();
-</script>
+  </script>
 </body>
 </html>

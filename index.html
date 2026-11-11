@@ -27,7 +27,7 @@
       min-height: 100vh;
       margin: 0;
       font-family: Tahoma, Verdana, sans-serif;
-      background: url("grass.png") center center / cover no-repeat fixed;
+      background: #3a7d2c url("grass.jpg") center center / cover no-repeat fixed;
       overflow-x: hidden;
       padding-bottom: 55px;
     }
@@ -508,7 +508,7 @@
     <img src="images/jemima@weeluke.co.uk.jpg" alt="Luke profile picture">
     <h2>Luke</h2>
     <p>Click to log in</p>
-    <button onclick="loginXP()">Enter</button>
+    <button type="button" onclick="loginXP()">Enter</button>
   </div>
 
   <div id="startOverlay">
@@ -565,6 +565,7 @@
       <p>You can see my PUBLIC socials below.</p>
       <p style="margin-bottom: 20px;">Please don't hesitate to reach out at me@weeluke.co.uk!</p>
 
+      <div class="button-stack">
 
         <a class="button button-discord" href="https://discord.com/users/783776027846639688" target="_blank" rel="noopener">
           <img class="icon" src="images/icons/discord.svg" alt="Discord Logo"> Discord
@@ -578,18 +579,18 @@
           <img class="icon" src="images/icons/github.svg" alt="GitHub Logo"> GitHub (Inactive)
         </a>
 
-        <a class="button button-default" href="mailto:me@weeluke.co.uk" target="_blank" rel="noopener">
+        <a class="button button-default" href="mailto:me@weeluke.co.uk">
           <img class="icon" src="images/icons/generic-email.svg" alt="Email Icon"> Email Me!
         </a>
 
         <a class="button button-default" href="https://www.roblox.com/users/9760396757/profile" target="_blank" rel="noopener">
           <img class="icon" src="images/icons/Roblox_Logo.svg" alt="Roblox"> Wee Roblox
         </a>
-            <a class="button button-default" href="guestbook.html" role="button">
+            <a class="button button-default" href="guestbook.html">
   <img class="icon" src="images/icons/generic-email.svg" alt="Guestbook Icon"> Guestbook
 </a>
 
-<a class="button button-default" href="archive.html" role="button">
+<a class="button button-default" href="archive.html">
   <img class="icon" src="images/icons/spotify.svg" alt="Music Archive Icon"> Music Archive
 </a>
       </div>
@@ -660,6 +661,21 @@
 
     let highestZ = 10;
 
+    // Track names, artists and Discord text come from other services,
+    // so escape them before they go into innerHTML.
+    function escapeHTML(text) {
+      return String(text ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function safeURL(url, fallback = "") {
+      return /^https?:\/\//i.test(url || "") ? url : fallback;
+    }
+
 function loginXP() {
   const login = document.getElementById("xpLogin");
   const startup = document.getElementById("startupSound");
@@ -669,13 +685,13 @@ function loginXP() {
 
   if (startup) {
     startup.volume = 0.7;
-    startup.play();
+    startup.play().catch(() => {});
   }
 
   setTimeout(() => {
     if (music) {
       music.volume = 0.25;
-      music.play();
+      music.play().catch(() => {});
     }
   }, 4500);
 
@@ -874,17 +890,17 @@ if (activeDevices.length) {
 
         box.innerHTML = `
           <div class="discord-user">
-            <img src="${avatarURL}" alt="Discord avatar">
+            <img src="${escapeHTML(avatarURL)}" alt="Discord avatar">
 
             <div>
-              <strong>${user.username}</strong><br>
+              <strong>${escapeHTML(user.username)}</strong><br>
 
 <span class="status-dot ${statusClass}"></span>
 ${status === "offline" ? "offline" : status}
 ${offlineText}
 
               ${status !== "offline" && customStatusText
-                ? `<br><small>${customStatusText}</small>`
+                ? `<br><small>${escapeHTML(customStatusText)}</small>`
                 : ""}
               ${deviceText}
             </div>
@@ -906,7 +922,7 @@ ${offlineText}
         const response = await fetch(url);
         const data = await response.json();
 
-        const track = data.recenttracks?.track?.[0];
+        const track = [].concat(data.recenttracks?.track || [])[0];
 
         if (!track) {
           box.innerHTML = "No Spotify activity.";
@@ -914,18 +930,18 @@ ${offlineText}
         }
 
         const isNowPlaying = track["@attr"] && track["@attr"].nowplaying;
-        const image = track.image?.[2]?.["#text"] || "";
-        const artist = track.artist["#text"];
-        const trackUrl = track.url || `https://open.spotify.com/search/${encodeURIComponent(track.name + " " + artist)}`;
+        const image = safeURL(track.image?.[2]?.["#text"]);
+        const artist = track.artist?.["#text"] || "";
+        const trackUrl = safeURL(track.url, `https://open.spotify.com/search/${encodeURIComponent(track.name + " " + artist)}`);
 
         box.innerHTML = `
-          <a class="spotify-box" href="${trackUrl}" target="_blank" rel="noopener">
-            ${image ? `<img src="${image}" alt="Album art">` : ""}
+          <a class="spotify-box" href="${escapeHTML(trackUrl)}" target="_blank" rel="noopener">
+            ${image ? `<img src="${escapeHTML(image)}" alt="Album art">` : ""}
 
             <div class="track-info">
               <strong>${isNowPlaying ? "Currently Listening" : "Last Played"}</strong><br>
-              ${track.name}<br>
-              <small>${artist}</small>
+              ${escapeHTML(track.name)}<br>
+              <small>${escapeHTML(artist)}</small>
             </div>
           </a>
         `;
@@ -958,15 +974,15 @@ async function loadMoodFromSongs() {
         const response = await fetch(url);
         const data = await response.json();
 
-        const tracks = data.recenttracks?.track || [];
+        const tracks = [].concat(data.recenttracks?.track || []);
 
         let html = "";
 
         tracks.forEach(track => {
           const isNowPlaying = track["@attr"] && track["@attr"].nowplaying;
-          const image = track.image?.[2]?.["#text"] || "";
-          const artist = track.artist["#text"];
-          const trackUrl = track.url || `https://open.spotify.com/search/${encodeURIComponent(track.name + " " + artist)}`;
+          const image = safeURL(track.image?.[2]?.["#text"]);
+          const artist = track.artist?.["#text"] || "";
+          const trackUrl = safeURL(track.url, `https://open.spotify.com/search/${encodeURIComponent(track.name + " " + artist)}`);
 
           let timeText = "Now";
 
@@ -982,13 +998,13 @@ async function loadMoodFromSongs() {
           }
 
           html += `
-            <a class="track" href="${trackUrl}" target="_blank" rel="noopener">
-              ${image ? `<img src="${image}" alt="Album art">` : ""}
+            <a class="track" href="${escapeHTML(trackUrl)}" target="_blank" rel="noopener">
+              ${image ? `<img src="${escapeHTML(image)}" alt="Album art">` : ""}
 
               <div class="track-info">
                 <strong>${isNowPlaying ? "Now Playing" : "Recently Played"}</strong><br>
-                ${track.name}<br>
-                <small>${artist}</small><br>
+                ${escapeHTML(track.name)}<br>
+                <small>${escapeHTML(artist)}</small><br>
                 <small>🕒 ${timeText}</small>
               </div>
             </a>
